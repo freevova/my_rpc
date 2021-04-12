@@ -1,9 +1,6 @@
 defmodule MyRpc.Encoder do
-  def encode(args) do
-    to_string(args)
-  end
+  @encoder MyRpc.Encoder.ErlangTerm
 
-  def decode(args) do
-    args
-  end
+  defdelegate encode(data), to: @encoder
+  defdelegate decode(data), to: @encoder
 end

@@ -47,23 +47,7 @@ defmodule MyRpc.Receiver do
     )
   end
 
-  defp decode_request!(data) do
-    {n, _} = Integer.parse(data)
-    n
-  end
-
-  defp process_request(data) do
-    MyRpc.Services.Calculator.fib(data)
-  end
-
-  defp encode_response!(data) do
-    to_string(data)
-  end
-
   def handle_message(_, %Broadway.Message{} = message, _context) do
-    IO.inspect(message)
-    # AMQP.Basic.ack(message.metadata.amqp_channel, meta.delivery_tag)
-
     response =
       message.data
       |> decode_request!()
@@ -79,5 +63,26 @@ defmodule MyRpc.Receiver do
     )
 
     message
+  end
+
+  defp decode_request!(data) do
+    {_procedure, _args} = MyRpc.Encoder.decode(data)
+  end
+
+  defp process_request({procedure, args}) do
+    case {procedure, args} do
+      {"add", {n1, n2}} when is_number(n1) and is_number(n2) ->
+        MyRpc.Services.Calculator.add(n1, n2)
+
+      {"sub", {n1, n2}} when is_number(n1) and is_number(n2) ->
+        MyRpc.Services.Calculator.sub(n1, n2)
+
+      {"fib", n} when is_number(n) ->
+        MyRpc.Services.Calculator.fib(n)
+    end
+  end
+
+  defp encode_response!(data) do
+    MyRpc.Encoder.encode(data)
   end
 end

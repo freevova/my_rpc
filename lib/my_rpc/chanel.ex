@@ -47,7 +47,7 @@ defmodule MyRpc.Channel do
   def handle_call({:request, {m, f, a}}, from, %State{channel: channel, config: config} = state) do
     correlation_id = generate_correlation_id()
     MyRpc.RequestStorage.put({correlation_id, from})
-    data = MyRpc.Encoder.encode(a)
+    data = MyRpc.Encoder.encode({f, a})
 
     opts = [
       reply_to: config.response_queue,
